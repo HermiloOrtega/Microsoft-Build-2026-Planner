@@ -11,6 +11,19 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap"
       rel="stylesheet"
     />
+    <!-- Google Analytics — only loads outside localhost -->
+    <script>
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-YMR14XY16S';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-YMR14XY16S');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
