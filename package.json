@@ -1,15 +1,10 @@
 {
-  "name": "microsoft-build-2026-planner",
-  "private": true,
+  "name": "ms-build-planner",
   "version": "1.0.0",
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "cd client && npm install && npm run build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "build:client": "cd client && npm install && npm run build",
+    "build:server": "cd server && npm install && npm run build",
+    "build:all": "npm run build:client && npm run build:server"
   }
 }

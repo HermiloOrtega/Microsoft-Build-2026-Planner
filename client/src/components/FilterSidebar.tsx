@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, FormEvent } from 'react';
 import { Session, SessionFilters } from '../types';
+import { usePassword } from '../context/PasswordContext';
+import { checkPassword } from '../api/sessions';
 
 interface Props {
   filters: SessionFilters;
@@ -36,6 +38,37 @@ function FilterBtn({
 }
 
 export default function FilterSidebar({ filters, sessions, onFilterChange }: Props) {
+  const { setPassword, isAdmin, setIsAdmin } = usePassword();
+  const [showPwInput, setShowPwInput] = useState(false);
+  const [pwInput,     setPwInput]     = useState('');
+  const [pwError,     setPwError]     = useState('');
+  const [checking,    setChecking]    = useState(false);
+
+  async function handleAdminSubmit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = pwInput.trim();
+    if (!trimmed) return;
+    setChecking(true);
+    setPwError('');
+    const ok = await checkPassword(trimmed);
+    setChecking(false);
+    if (ok) {
+      setPassword(trimmed);
+      setIsAdmin(true);
+      setPwInput('');
+      setShowPwInput(false);
+    } else {
+      setPwError('Incorrect password');
+    }
+  }
+
+  function handleLock() {
+    setIsAdmin(false);
+    setShowPwInput(false);
+    setPwInput('');
+    setPwError('');
+  }
+
   const counts = React.useMemo(() => ({
     all:      sessions.length,
     must:     sessions.filter(s => s.prio === 'must').length,
@@ -120,6 +153,61 @@ export default function FilterSidebar({ filters, sessions, onFilterChange }: Pro
         <FilterBtn active={filters.recorded === 'all'} onClick={() => onFilterChange({ recorded: 'all' })}>All</FilterBtn>
         <FilterBtn active={filters.recorded === 'yes'} onClick={() => onFilterChange({ recorded: 'yes' })}>✓ Recorded</FilterBtn>
         <FilterBtn active={filters.recorded === 'no'}  onClick={() => onFilterChange({ recorded: 'no'  })}>★ Must attend in-person</FilterBtn>
+      </div>
+
+      {/* Admin */}
+      <div className="sidebar-section sidebar-admin">
+        {isAdmin ? (
+          <button className="filter-btn admin-unlocked" onClick={handleLock}>
+            🔓 Admin: Unlocked
+          </button>
+        ) : showPwInput ? (
+          <form onSubmit={handleAdminSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <input
+              type="password"
+              autoFocus
+              placeholder="Master password"
+              value={pwInput}
+              onChange={e => { setPwInput(e.target.value); setPwError(''); }}
+              onKeyDown={e => e.key === 'Escape' && (setShowPwInput(false), setPwInput(''), setPwError(''))}
+              style={{
+                background: 'var(--surface2)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                color: 'var(--text)',
+                fontSize: 12,
+                padding: '5px 10px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            />
+            {pwError && (
+              <span style={{ fontSize: 11, color: 'var(--err, #f87171)' }}>{pwError}</span>
+            )}
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={checking}
+                style={{ flex: 1, fontSize: 12, padding: '4px 0' }}
+              >
+                {checking ? 'Checking…' : 'Unlock'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => { setShowPwInput(false); setPwInput(''); setPwError(''); }}
+                style={{ flex: 1, fontSize: 12, padding: '4px 0' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <button className="filter-btn admin-locked" onClick={() => setShowPwInput(true)}>
+            🔒 Admin
+          </button>
+        )}
       </div>
     </aside>
   );

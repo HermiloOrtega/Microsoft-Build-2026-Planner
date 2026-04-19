@@ -1,6 +1,6 @@
 import { Session, SessionFilters, SyncResult } from '../types';
 
-const BASE = '/api';
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api';
 
 function buildQuery(filters: Partial<SessionFilters>): string {
   const params = new URLSearchParams();
@@ -15,6 +15,10 @@ function buildQuery(filters: Partial<SessionFilters>): string {
   return qs ? `?${qs}` : '';
 }
 
+function pwdHeader(password?: string): Record<string, string> {
+  return password ? { 'X-Master-Password': password } : {};
+}
+
 export async function fetchSessions(filters: Partial<SessionFilters> = {}): Promise<Session[]> {
   const res = await fetch(`${BASE}/sessions${buildQuery(filters)}`);
   if (!res.ok) throw new Error(`Failed to fetch sessions: ${res.statusText}`);
@@ -27,41 +31,55 @@ export async function fetchSession(id: number): Promise<Session> {
   return res.json();
 }
 
-export async function createSession(data: Partial<Session>): Promise<Session> {
+export async function createSession(data: Partial<Session>, password?: string): Promise<Session> {
   const res = await fetch(`${BASE}/sessions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...pwdHeader(password) },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`Failed to create session: ${res.statusText}`);
   return res.json();
 }
 
-export async function updateSession(id: number, data: Partial<Session>): Promise<Session> {
+export async function updateSession(id: number, data: Partial<Session>, password?: string): Promise<Session> {
   const res = await fetch(`${BASE}/sessions/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...pwdHeader(password) },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`Failed to update session ${id}: ${res.statusText}`);
   return res.json();
 }
 
-export async function deleteSession(id: number): Promise<void> {
-  const res = await fetch(`${BASE}/sessions/${id}`, { method: 'DELETE' });
+export async function deleteSession(id: number, password?: string): Promise<void> {
+  const res = await fetch(`${BASE}/sessions/${id}`, {
+    method: 'DELETE',
+    headers: { ...pwdHeader(password) },
+  });
   if (!res.ok) throw new Error(`Failed to delete session ${id}: ${res.statusText}`);
 }
 
-export async function triggerSync(): Promise<SyncResult> {
-  const res = await fetch(`${BASE}/sync`, { method: 'POST' });
+export async function triggerSync(password?: string): Promise<SyncResult> {
+  const res = await fetch(`${BASE}/sync`, {
+    method: 'POST',
+    headers: { ...pwdHeader(password) },
+  });
   if (!res.ok) throw new Error(`Sync failed: ${res.statusText}`);
   return res.json();
 }
 
-export async function pasteImport(text: string): Promise<SyncResult> {
+export async function checkPassword(password: string): Promise<boolean> {
+  const res = await fetch(`${BASE}/auth/check`, {
+    method: 'POST',
+    headers: { ...pwdHeader(password) },
+  });
+  return res.ok;
+}
+
+export async function pasteImport(text: string, password?: string): Promise<SyncResult> {
   const res = await fetch(`${BASE}/paste`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...pwdHeader(password) },
     body: JSON.stringify({ text }),
   });
   if (!res.ok) {

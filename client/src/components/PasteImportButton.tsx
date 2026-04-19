@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { pasteImport } from '../api/sessions';
 import { SyncResult } from '../types';
+import { usePassword } from '../context/PasswordContext';
 
 interface Props {
   onImportComplete: () => void;
@@ -9,6 +10,7 @@ interface Props {
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export default function PasteImportButton({ onImportComplete }: Props) {
+  const { password } = usePassword();
   const [open,    setOpen]    = useState(false);
   const [text,    setText]    = useState('');
   const [status,  setStatus]  = useState<Status>('idle');
@@ -37,7 +39,7 @@ export default function PasteImportButton({ onImportComplete }: Props) {
     setResult(null);
     setErrMsg(null);
     try {
-      const res = await pasteImport(text);
+      const res = await pasteImport(text, password);
       setResult(res);
       setStatus('success');
       onImportComplete();

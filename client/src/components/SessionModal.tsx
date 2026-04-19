@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Session, Prio } from '../types';
 import { TypeBadge, RecBadge, PRIO_LABELS } from './Badges';
 import { updateSession, deleteSession } from '../api/sessions';
+import { usePassword } from '../context/PasswordContext';
 
 interface Props {
   session: Session;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function SessionModal({ session, onClose, onSaved, onDeleted }: Props) {
+  const { password } = usePassword();
   const [prio,        setPrio]        = useState<Prio>(session.prio);
   const [why,         setWhy]         = useState(session.why ?? '');
   const [isFavorite,  setIsFavorite]  = useState(session.is_favorite);
@@ -27,7 +29,7 @@ export default function SessionModal({ session, onClose, onSaved, onDeleted }: P
         prio,
         why,
         is_favorite: isFavorite,
-      });
+      }, password);
       onSaved(updated);
     } catch (err: any) {
       setError(err.message);
@@ -41,7 +43,7 @@ export default function SessionModal({ session, onClose, onSaved, onDeleted }: P
     setDeleting(true);
     setError(null);
     try {
-      await deleteSession(session.id);
+      await deleteSession(session.id, password);
       onDeleted(session.id);
     } catch (err: any) {
       setError(err.message);

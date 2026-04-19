@@ -5,6 +5,7 @@ import path from 'path';
 import sessionsRouter from './routes/sessions';
 import syncRouter from './routes/sync';
 import pasteRouter from './routes/paste';
+import { requireMasterPassword } from './middleware/auth';
 
 // Resolve .env from repo root — reliable in both tsx (src/) and node (dist/)
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -16,16 +17,23 @@ const isProd = process.env.NODE_ENV === 'production';
 // ── Middleware ─────────────────────────────────────────────────────────────────
 // In production the server itself serves the React app (same origin → no CORS needed),
 // but we keep the header for any external API consumers.
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true,
-}));
+const allowedOrigins = isProd
+  ? [process.env.CORS_ORIGIN || 'https://build.hermiloortega.com']
+  : ['http://localhost:5173'];
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
+app.use(requireMasterPassword);
 
 // ── API Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/sync',     syncRouter);
 app.use('/api/paste',    pasteRouter);
+
+// ── Auth check ─────────────────────────────────────────────────────────────────
+// The requireMasterPassword middleware rejects wrong passwords before reaching here.
+app.post('/api/auth/check', (_req, res) => {
+  res.json({ ok: true });
+});
 
 // ── Health check ───────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

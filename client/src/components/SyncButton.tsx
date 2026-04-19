@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { triggerSync } from '../api/sessions';
 import { SyncResult } from '../types';
+import { usePassword } from '../context/PasswordContext';
 
 interface Props {
   onSyncComplete: () => void;
@@ -9,6 +10,7 @@ interface Props {
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export default function SyncButton({ onSyncComplete }: Props) {
+  const { password } = usePassword();
   const [status,  setStatus]  = useState<Status>('idle');
   const [result,  setResult]  = useState<SyncResult | null>(null);
   const [errMsg,  setErrMsg]  = useState<string | null>(null);
@@ -18,7 +20,7 @@ export default function SyncButton({ onSyncComplete }: Props) {
     setResult(null);
     setErrMsg(null);
     try {
-      const res = await triggerSync();
+      const res = await triggerSync(password);
       setResult(res);
       setStatus('success');
       onSyncComplete();

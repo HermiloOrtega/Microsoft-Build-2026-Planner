@@ -7,6 +7,7 @@ import SessionModal from './components/SessionModal';
 import SyncButton from './components/SyncButton';
 import PasteImportButton from './components/PasteImportButton';
 import { PrioBadge } from './components/Badges';
+import { usePassword } from './context/PasswordContext';
 
 const PRIO_ORDER: Record<string, number> = { must: 0, high: 1, good: 2, skip: 3 };
 
@@ -21,6 +22,7 @@ const DEFAULT_FILTERS: SessionFilters = {
 };
 
 export default function App() {
+  const { isAdmin } = usePassword();
   const [allSessions,    setAllSessions]    = useState<Session[]>([]);
   const [loading,        setLoading]        = useState(true);
   const [error,          setError]          = useState<string | null>(null);
@@ -132,10 +134,12 @@ export default function App() {
       <header className="header">
         <div className="header-top">
           <div>
-            <div className="header-eyebrow">Microsoft Build 2026 · San Francisco</div>
-            <h1>Session <span>Planner</span></h1>
-            <p className="header-sub">
-              {allSessions.length} sessions · Software Engineering Manager · Microsoft Stack · Quattro Constructors / RAM
+            <h1>Microsoft Build 2026 <span>Planner</span></h1>
+            <p className="header-byline">
+              Built by{' '}
+              <a href="https://hermiloortega.com" target="_blank" rel="noopener noreferrer">
+                Hermilo Ortega
+              </a>
             </p>
           </div>
           <div className="metrics">
@@ -229,8 +233,12 @@ export default function App() {
               <span className="result-count">
                 {loading ? 'Loading…' : `${filtered.length} of ${allSessions.length} sessions`}
               </span>
-              <SyncButton onSyncComplete={loadSessions} />
-              <PasteImportButton onImportComplete={loadSessions} />
+              {isAdmin && (
+                <>
+                  <SyncButton onSyncComplete={loadSessions} />
+                  <PasteImportButton onImportComplete={loadSessions} />
+                </>
+              )}
             </div>
           </div>
 

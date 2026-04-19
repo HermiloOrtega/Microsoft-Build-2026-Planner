@@ -185,9 +185,6 @@ export default function App() {
           <div>
             <div className="header-eyebrow">Microsoft Build 2026 · San Francisco</div>
             <h1>Session <span>Planner</span></h1>
-            <p className="header-sub">
-              {SESSIONS.length} sessions curated for Software Engineering Manager · Microsoft Stack · Quattro Constructors / RAM
-            </p>
           </div>
           <div className="metrics">
             <div className="metric"><div className="metric-val c-total">{SESSIONS.length}</div><div className="metric-label">Total</div></div>

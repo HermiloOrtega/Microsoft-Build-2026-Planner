@@ -82,8 +82,19 @@ body::before {
 
 .header h1 span { color: var(--accent2); }
 
+.header-byline {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.header-byline a {
+  color: var(--accent2);
+  text-decoration: none;
+}
+.header-byline a:hover { text-decoration: underline; }
+
 .header-sub {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--muted);
   font-size: 13px;
   max-width: 480px;
@@ -180,6 +191,8 @@ body::before {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-section { margin-bottom: 28px; }
@@ -234,6 +247,24 @@ body::before {
 }
 
 .filter-btn.active .count { color: var(--text); }
+
+.sidebar-admin {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.filter-btn.admin-locked {
+  color: var(--muted);
+  opacity: 0.7;
+}
+.filter-btn.admin-locked:hover { opacity: 1; color: var(--text); }
+
+.filter-btn.admin-unlocked {
+  color: var(--high);
+  border-color: rgba(34,197,94,0.3);
+}
+.filter-btn.admin-unlocked:hover { background: rgba(34,197,94,0.08); }
 
 .type-tag {
   display: inline-block;
